@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Image Editor</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen">
+            <div class="loader">
+                <div class="spinner"></div>
+                <p>Loading 3D Image Editor...</p>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div id="main-interface" style="display: none;">
+            <!-- Canvas Container -->
+            <div id="canvas-container">
+                <canvas id="three-canvas"></canvas>
+                <canvas id="2d-overlay" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
+            </div>
+
+            <!-- Mobile UI -->
+            <div id="mobile-ui" class="mobile-only">
+                <div class="mobile-toolbar">
+                    <button id="mobile-menu-btn" class="icon-btn">☰</button>
+                    <button id="mobile-save-btn" class="icon-btn">💾</button>
+                    <button id="mobile-undo-btn" class="icon-btn">↶</button>
+                    <button id="mobile-redo-btn" class="icon-btn">↷</button>
+                </div>
+                
+                <div id="mobile-menu" class="mobile-menu hidden">
+                    <div class="menu-section">
+                        <h3>File</h3>
+                        <button id="mobile-upload-btn">📁 Upload Image</button>
+                        <button id="mobile-save-project-btn">💾 Save Project</button>
+                        <button id="mobile-load-project-btn">📂 Load Project</button>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h3>Tools</h3>
+                        <button id="mobile-crop-btn">✂️ Crop</button>
+                        <button id="mobile-emoji-btn">😀 Add Emoji</button>
+                        <button id="mobile-filters-btn">🎨 Filters</button>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h3>3D Settings</h3>
+                        <label>
+                            <input type="checkbox" id="mobile-3d-rotation"> 3D Rotation
+                        </label>
+                        <label>
+                            <input type="checkbox" id="mobile-lighting"> Lighting Effects
+                        </label>
+                        <label>
+                            Performance: <select id="mobile-performance">
+                                <option value="60fps">60 FPS</option>
+                                <option value="30fps">30 FPS</option>
+                                <option value="quality">Best Quality</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop UI -->
+            <div id="desktop-ui" class="desktop-only">
+                <!-- Top Toolbar -->
+                <div id="top-toolbar">
+                    <div class="toolbar-section">
+                        <button id="upload-btn" class="btn primary">📁 Upload Image</button>
+                        <button id="save-btn" class="btn">💾 Save PNG</button>
+                        <button id="save-project-btn" class="btn">💾 Save Project</button>
+                        <button id="load-project-btn" class="btn">📂 Load Project</button>
+                    </div>
+                    
+                    <div class="toolbar-section">
+                        <button id="undo-btn" class="btn">↶ Undo</button>
+                        <button id="redo-btn" class="btn">↷ Redo</button>
+                    </div>
+                    
+                    <div class="toolbar-section">
+                        <button id="crop-btn" class="btn">✂️ Crop</button>
+                        <button id="emoji-btn" class="btn">😀 Emojis</button>
+                        <button id="filters-btn" class="btn">🎨 Filters</button>
+                    </div>
+                </div>
+
+                <!-- Side Panel -->
+                <div id="side-panel">
+                    <div class="panel-section">
+                        <h3>3D Controls</h3>
+                        <label>
+                            <input type="checkbox" id="enable-3d-rotation" checked> Enable 3D Rotation
+                        </label>
+                        <label>
+                            <input type="checkbox" id="enable-lighting" checked> Lighting Effects
+                        </label>
+                        <label>
+                            Performance: 
+                            <select id="performance-mode">
+                                <option value="60fps">60 FPS</option>
+                                <option value="30fps">30 FPS</option>
+                                <option value="quality">Best Quality</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="panel-section">
+                        <h3>Image Filters</h3>
+                        <label>
+                            Brightness: <input type="range" id="brightness" min="0" max="200" value="100">
+                            <span id="brightness-value">100%</span>
+                        </label>
+                        <label>
+                            Contrast: <input type="range" id="contrast" min="0" max="200" value="100">
+                            <span id="contrast-value">100%</span>
+                        </label>
+                        <label>
+                            Saturation: <input type="range" id="saturation" min="0" max="200" value="100">
+                            <span id="saturation-value">100%</span>
+                        </label>
+                    </div>
+
+                    <div class="panel-section">
+                        <h3>Crop Settings</h3>
+                        <div id="crop-controls" style="display: none;">
+                            <label>
+                                Aspect Ratio:
+                                <select id="crop-ratio">
+                                    <option value="free">Free</option>
+                                    <option value="1:1">1:1 (Square)</option>
+                                    <option value="16:9">16:9 (Widescreen)</option>
+                                    <option value="4:3">4:3 (Standard)</option>
+                                    <option value="3:2">3:2 (Photo)</option>
+                                </select>
+                            </label>
+                            <button id="apply-crop-btn" class="btn primary">Apply Crop</button>
+                            <button id="cancel-crop-btn" class="btn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emoji Panel -->
+            <div id="emoji-panel" class="popup-panel hidden">
+                <div class="panel-header">
+                    <h3>Add Emoji</h3>
+                    <button id="close-emoji-panel" class="close-btn">×</button>
+                </div>
+                <div class="panel-content">
+                    <input type="text" id="emoji-search" placeholder="Search emojis...">
+                    <div id="emoji-categories">
+                        <button class="emoji-category active" data-category="smileys">😀 Smileys</button>
+                        <button class="emoji-category" data-category="gestures">👋 Gestures</button>
+                        <button class="emoji-category" data-category="objects">📱 Objects</button>
+                        <button class="emoji-category" data-category="symbols">❤️ Symbols</button>
+                    </div>
+                    <div id="emoji-grid"></div>
+                </div>
+            </div>
+
+            <!-- File Input (Hidden) -->
+            <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+            <input type="file" id="project-input" accept=".json" style="display: none;">
+
+            <!-- Drop Zone -->
+            <div id="drop-zone" class="drop-zone hidden">
+                <div class="drop-content">
+                    <div class="drop-icon">📁</div>
+                    <p>Drop images here to upload</p>
+                </div>
+            </div>
+
+            <!-- Performance Monitor -->
+            <div id="performance-monitor">
+                <span id="fps-counter">FPS: --</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/dist/lil-gui.umd.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="js/scene-manager.js"></script>
+    <script src="js/image-processor.js"></script>
+    <script src="js/emoji-manager.js"></script>
+    <script src="js/project-manager.js"></script>
+    <script src="js/ui-manager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
